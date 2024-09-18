@@ -41,17 +41,11 @@ BORDER_DIFF_COLOUR_THRESHOLD = 0.05
 BORDER_DIFF_PROPORTION_THRESHOLD = 0.01
 
 
-@dataclass(frozen=True)
-class DetectedBorder:
-    size: BorderSize
-    colour: np.ndarray  # Only relevant if the border size is nonzero on all sides.
-
-
 def detect_border(
     image: Image,
     channel_diff_threshold: float = BORDER_DIFF_COLOUR_THRESHOLD,
     pixel_count_threshold: float = BORDER_DIFF_PROPORTION_THRESHOLD,
-) -> DetectedBorder:
+) -> BorderSize:
     """Infers the size of an image's border from pixel values.
     The border must be uniform colour on all sides."""
 
@@ -86,9 +80,8 @@ def detect_border(
     border_size = BorderSize(
         top=find_border(0, False), bottom=find_border(0, True), left=find_border(1, False), right=find_border(1, True)
     )
-    border = DetectedBorder(border_size, ref_colour)
-    logger.debug(f"Detected border: {border}")
-    return border
+    logger.debug(f"Detected border: {border_size}")
+    return border_size
 
 
 def remove_border(image: Image, border: BorderSize | None = None) -> Image:
@@ -97,7 +90,7 @@ def remove_border(image: Image, border: BorderSize | None = None) -> Image:
     :param border: Known border size. If `None`, inferred from the image content."""
 
     if border is None:
-        border = detect_border(image).size
+        border = detect_border(image)
     if border.any_side:
         new_size = (
             border.left,  # Left
