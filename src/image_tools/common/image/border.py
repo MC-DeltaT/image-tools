@@ -1,9 +1,8 @@
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 
 import numpy as np
 from PIL.Image import Image
-
 
 logger = logging.getLogger(__name__)
 
@@ -42,10 +41,13 @@ BORDER_DIFF_COLOUR_THRESHOLD = 0.05
 BORDER_DIFF_PROPORTION_THRESHOLD = 0.01
 
 
-def detect_border(image: Image, channel_diff_threshold: float = BORDER_DIFF_COLOUR_THRESHOLD,
-        pixel_count_threshold: float = BORDER_DIFF_PROPORTION_THRESHOLD) -> BorderSize:
+def detect_border(
+    image: Image,
+    channel_diff_threshold: float = BORDER_DIFF_COLOUR_THRESHOLD,
+    pixel_count_threshold: float = BORDER_DIFF_PROPORTION_THRESHOLD,
+) -> BorderSize:
     """Infers the size of an image's border from pixel values.
-        The border must be uniform colour on all sides."""
+    The border must be uniform colour on all sides."""
 
     data = np.array(image)
     # Shape is (height, width, channels)
@@ -76,30 +78,27 @@ def detect_border(image: Image, channel_diff_threshold: float = BORDER_DIFF_COLO
             depth += 1
 
     border_size = BorderSize(
-        top=find_border(0, False),
-        bottom=find_border(0, True),
-        left=find_border(1, False),
-        right=find_border(1, True)
+        top=find_border(0, False), bottom=find_border(0, True), left=find_border(1, False), right=find_border(1, True)
     )
-    logger.debug(f'Detected border: {border_size}')
+    logger.debug(f"Detected border: {border_size}")
     return border_size
 
 
 def remove_border(image: Image, border: BorderSize | None = None) -> Image:
     """Crop an image to remove its border.
-    
-        :param border: Known border size. If `None`, inferred from the image content."""
+
+    :param border: Known border size. If `None`, inferred from the image content."""
 
     if border is None:
         border = detect_border(image)
     if border.any_side:
         new_size = (
-            border.left,   # Left
-            border.top,    # Top
-            image.width - border.right,    # Right
+            border.left,  # Left
+            border.top,  # Top
+            image.width - border.right,  # Right
             image.height - border.bottom,  # Bottom
         )
-        logger.debug(f'Removing border, cropping to {new_size}')
+        logger.debug(f"Removing border, cropping to {new_size}")
         new_image = image.crop(new_size)
         return new_image
     else:

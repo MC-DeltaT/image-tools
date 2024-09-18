@@ -1,0 +1,37 @@
+[project]
+name = "image_tools"
+version = "0.0.1"
+authors = [
+    { name="Reece Jones", email="reece.jones131@gmail.com" }
+]
+description = "CLI tools for manipulating images"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English"
+]
+dynamic = [ "dependencies" ]
+
+[project.urls]
+Homepage = "https://github.com/MC-DeltaT/image-tools"
+
+[project.scripts]
+instagramable = "image_tools.instagramable.cli:main"
+
+[build-system]
+requires = [ "setuptools>=61" ]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+dependencies = { file = [ "requirements.txt" ] }
+
+[tool.ruff]
+line-length = 120
+lint.extend-select = ["I"]
+lint.isort.known-local-folder = ["image_tools", "test"]
+lint.ignore = [
+    "E731"  # Lambda assigned to name
+]

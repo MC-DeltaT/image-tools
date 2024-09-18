@@ -1,6 +1,5 @@
 import logging
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -14,5 +13,5 @@ def adjust_aspect_ratio(base_aspect_ratio: float) -> float:
         new_aspect = 0.8
     else:
         new_aspect = max(1, min(base_aspect_ratio, 1 / 0.8))
-    logger.debug(f'Adjusted aspect ratio {base_aspect_ratio:.2f} -> {new_aspect:.2f}')
+    logger.debug(f"Adjusted aspect ratio {base_aspect_ratio:.2f} -> {new_aspect:.2f}")
     return new_aspect

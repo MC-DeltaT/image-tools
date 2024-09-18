@@ -8,21 +8,18 @@ from image_tools.common.image.border import BorderSize
 from image_tools.common.image.types import IntSize
 from image_tools.instagramable.aspect_ratio import adjust_aspect_ratio
 
-
 logger = logging.getLogger(__name__)
 
 
 def calculate_baseline_border_size(image_size: IntSize, baseline_border_amount: float) -> BorderSize:
     """Calculates the baseline border size for an image based off its dimensions.
-        This border size is not final, it may need to be adjusted for aspect ratio."""
+    This border size is not final, it may need to be adjusted for aspect ratio."""
 
     avg_dim = np.mean(image_size)
     border_width = int(round(baseline_border_amount * avg_dim))
     border_height = int(round(baseline_border_amount * avg_dim))
-    border_size = BorderSize(
-        top=border_height, bottom=border_height,
-        left=border_width, right=border_width)
-    logger.debug(f'Baseline border size: {border_size}')
+    border_size = BorderSize(top=border_height, bottom=border_height, left=border_width, right=border_width)
+    logger.debug(f"Baseline border size: {border_size}")
     return border_size
 
 
@@ -32,10 +29,11 @@ def adjust_border_for_aspect_ratio(image_size: IntSize, baseline_border: BorderS
     # Calculate the image size and aspect ratio with  the baseline border, then adjust it by adding size.
     size_with_baseline_border = (
         image_size[0] + baseline_border.left + baseline_border.right,
-        image_size[1] + baseline_border.top + baseline_border.bottom)
+        image_size[1] + baseline_border.top + baseline_border.bottom,
+    )
     adjusted_aspect_ratio = adjust_aspect_ratio(aspect_ratio(size_with_baseline_border))
     adjusted_image_size = additive_adjust_size_for_aspect_ratio(size_with_baseline_border, adjusted_aspect_ratio)
-    
+
     # Calculate backwards to the adjusted border size.
     new_border_width = adjusted_image_size[0] - image_size[0]
     new_border_height = adjusted_image_size[1] - image_size[1]
@@ -43,9 +41,9 @@ def adjust_border_for_aspect_ratio(image_size: IntSize, baseline_border: BorderS
     new_border_top_bottom = ceil(new_border_height / 2)
     new_border_left_right = ceil(new_border_width / 2)
     new_border = BorderSize(
-        top=new_border_top_bottom, bottom=new_border_top_bottom,
-        left=new_border_left_right, right=new_border_left_right)
-    
-    logger.debug(f'Adjusted border size: {new_border}')
+        top=new_border_top_bottom, bottom=new_border_top_bottom, left=new_border_left_right, right=new_border_left_right
+    )
+
+    logger.debug(f"Adjusted border size: {new_border}")
     assert new_border.all_sides
     return new_border
