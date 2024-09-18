@@ -6,7 +6,7 @@ from enum import Enum
 from pathlib import Path
 
 from colour import Color
-from PIL import Image, ImageOps
+from PIL import Image
 
 from image_tools.common.cli.batch import (
     filter_input_file_paths,
@@ -17,10 +17,11 @@ from image_tools.common.cli.batch import (
 from image_tools.common.cli.exception import AppError
 from image_tools.common.cli.logging import log_config, suppress_external_logging
 from image_tools.common.image.aspect_ratio import aspect_ratio
-from image_tools.common.image.border import BorderSize, remove_border
+from image_tools.common.image.border import remove_border
 from image_tools.common.image.imageio import get_pil_image_write_params
-from image_tools.common.image.types import IntSize, size_to_str
-from image_tools.instagramable.border import adjust_border_for_aspect_ratio, calculate_baseline_border_size
+from image_tools.common.image.types import size_to_str
+from image_tools.instagramable.border import apply_new_border
+from image_tools.instagramable.sizing import adjust_image_size
 
 logger = logging.getLogger()
 logging.basicConfig(style="{", format="{levelname}: {message}")
@@ -41,6 +42,7 @@ class AppConfig:
     existing_border_handling: ExistingBorderHandling
     border_colour: Color
     border_baseline_size: float  # Proportional to image size
+    max_dimension: int
     output_directory: Path | None  # If none, output to input directory
     output_file_name_suffix: str
     allow_overwrite: bool
@@ -69,6 +71,9 @@ def get_config(args: list[str]) -> AppConfig:
         help="Baseline border size, as a proportion of the average image dimension.",
     )
     parser.add_argument(
+        "--max-dimension", type=int, default=2000, help="Maximum image width/height. Larger images are rescaled."
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=None,
@@ -92,6 +97,7 @@ def get_config(args: list[str]) -> AppConfig:
         existing_border_handling=parsed.existing_border,
         border_colour=parsed.border_colour,
         border_baseline_size=parsed.border_size,
+        max_dimension=parsed.max_dimension,
         output_directory=parsed.output_dir,
         output_file_name_suffix=parsed.output_suffix,
         allow_overwrite=parsed.overwrite,
@@ -100,22 +106,8 @@ def get_config(args: list[str]) -> AppConfig:
     )
 
 
-def calculate_new_border_size(image_size: IntSize, baseline_border_size: float) -> BorderSize:
-    """Calculates the border size in pixels."""
-
-    # Try to create a constant-sized border according to baseline_border_size.
-    # If the resulting image falls outside the aspect ratio constraint, expand the border in one dimension such that the
-    # aspect ratio becomes valid.
-    baseline_border = calculate_baseline_border_size(image_size, baseline_border_size)
-    border = adjust_border_for_aspect_ratio(image_size, baseline_border)
-    return border
-
-
-def apply_new_border(image: Image.Image, colour: Color, baseline_size: float) -> Image.Image:
-    border_size = calculate_new_border_size(image.size, baseline_size)
-    new_image = ImageOps.expand(image, border=border_size.pil_tuple, fill=colour.get_hex_l())
-    logger.info(f"New dimensions {size_to_str(new_image.size)} (aspect ratio {aspect_ratio(new_image.size):.2f})")
-    return new_image
+def log_final_image_info(image: Image.Image) -> None:
+    logger.info(f"New image dimensions: {size_to_str(image.size)}, aspect ratio {aspect_ratio(image.size):.2f}")
 
 
 def process_image(input_path: Path, output_path: Path, config: AppConfig) -> None:
@@ -140,6 +132,10 @@ def process_image(input_path: Path, output_path: Path, config: AppConfig) -> Non
             image = apply_border_func(image)
         case v:  # type: ignore
             raise AssertionError(f"Unhandled ExistingBorderHandling {v}")
+
+    image = adjust_image_size(image, config.max_dimension)
+
+    log_final_image_info(image)
 
     if config.dry_run:
         logger.info(f"Dry run: Would save image to '{output_path}'")

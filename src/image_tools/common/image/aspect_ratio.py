@@ -26,7 +26,9 @@ def additive_adjust_size_for_aspect_ratio(size: IntSize, desired_aspect_ratio: f
         new_width = size[0]
         new_height = size[1]
     new_size = new_width, new_height
-    logger.debug(f"Adjusted size: {size_to_str(size)} -> {size_to_str(new_size)}")
+    logger.debug(
+        f"Adjusted size to fit aspect ratio {desired_aspect_ratio:.2f}: {size_to_str(size)} -> {size_to_str(new_size)}"
+    )
     # This function should never decrease the image size.
     assert new_width >= size[0]
     assert new_height >= size[1]

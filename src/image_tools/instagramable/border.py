@@ -2,10 +2,13 @@ import logging
 from math import ceil
 
 import numpy as np
+from colour import Color
+from PIL import ImageOps
+from PIL.Image import Image
 
 from image_tools.common.image.aspect_ratio import additive_adjust_size_for_aspect_ratio, aspect_ratio
 from image_tools.common.image.border import BorderSize
-from image_tools.common.image.types import IntSize
+from image_tools.common.image.types import IntSize, size_to_str
 from image_tools.instagramable.aspect_ratio import adjust_aspect_ratio
 
 logger = logging.getLogger(__name__)
@@ -47,3 +50,23 @@ def adjust_border_for_aspect_ratio(image_size: IntSize, baseline_border: BorderS
     logger.debug(f"Adjusted border size: {new_border}")
     assert new_border.all_sides
     return new_border
+
+
+def calculate_new_border_size(image_size: IntSize, baseline_border_size: float) -> BorderSize:
+    """Calculates the border size in pixels."""
+
+    # Try to create a constant-sized border according to baseline_border_size.
+    # If the resulting image falls outside the aspect ratio constraint, expand the border in one dimension such that the
+    # aspect ratio becomes valid.
+    baseline_border = calculate_baseline_border_size(image_size, baseline_border_size)
+    border = adjust_border_for_aspect_ratio(image_size, baseline_border)
+    return border
+
+
+def apply_new_border(image: Image, colour: Color, baseline_size: float) -> Image:
+    border_size = calculate_new_border_size(image.size, baseline_size)
+    new_image = ImageOps.expand(image, border=border_size.pil_tuple, fill=colour.get_hex_l())
+    logger.debug(
+        f"Dimensions after border {size_to_str(new_image.size)} (aspect ratio {aspect_ratio(new_image.size):.2f})"
+    )
+    return new_image
