@@ -15,14 +15,14 @@ from image_tools.common.cli.batch import (
     validate_output_paths,
 )
 from image_tools.common.cli.exception import AppError
-from image_tools.common.cli.utils import log_config
+from image_tools.common.cli.logging import log_config, suppress_external_logging
 from image_tools.common.image.aspect_ratio import aspect_ratio
 from image_tools.common.image.border import BorderSize, remove_border
 from image_tools.common.image.imageio import get_pil_image_write_params
 from image_tools.common.image.types import IntSize, size_to_str
 from image_tools.instagramable.border import adjust_border_for_aspect_ratio, calculate_baseline_border_size
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 logging.basicConfig(style="{", format="{levelname}: {message}")
 
 
@@ -57,7 +57,7 @@ def get_config(args: list[str]) -> AppConfig:
         type=ExistingBorderHandling,
         choices=list(ExistingBorderHandling),
         default=ExistingBorderHandling.ADD,
-        help="How to handle images with existing borders. "
+        help="How to handle existing borders on images. "
         f"{ExistingBorderHandling.ADD}: Add the new border anyway. "
         f"{ExistingBorderHandling.REPLACE}: Replace the existing border.",
     )
@@ -74,7 +74,7 @@ def get_config(args: list[str]) -> AppConfig:
         default=None,
         help="Output directory path. Defaults to output in the same directory as the input.",
     )
-    parser.add_argument("--output-suffix", type=str, default="-border", help="Output file name suffix.")
+    parser.add_argument("--output-suffix", type=str, default="-instagram", help="Output file name suffix.")
     parser.add_argument(
         "--overwrite", action="store_true", default=False, help="Allow overwriting files which already exist."
     )
@@ -152,14 +152,15 @@ def process_image(input_path: Path, output_path: Path, config: AppConfig) -> Non
         logger.info(f"Saved image to '{output_path}'")
 
 
-def main(args: list[str]):
+def main():
     try:
-        config = get_config(args)
+        config = get_config(sys.argv[1:])
 
         if config.verbose:
             logger.setLevel(logging.DEBUG)
         else:
             logger.setLevel(logging.INFO)
+        suppress_external_logging()
 
         log_config(config)
 
@@ -185,4 +186,4 @@ def main(args: list[str]):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()

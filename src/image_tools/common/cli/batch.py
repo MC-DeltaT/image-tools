@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from glob import glob
 from pathlib import Path
 
-from image_tools.cli_common.exception import AppError
+from image_tools.common.cli.exception import AppError
 
 logger = logging.getLogger(__name__)
 
