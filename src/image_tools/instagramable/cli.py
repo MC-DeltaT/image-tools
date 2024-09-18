@@ -58,7 +58,7 @@ def get_config(args: list[str]) -> AppConfig:
         "--existing-border",
         type=ExistingBorderHandling,
         choices=list(ExistingBorderHandling),
-        default=ExistingBorderHandling.ADD,
+        default=ExistingBorderHandling.REPLACE,
         help="How to handle existing borders on images. "
         f"{ExistingBorderHandling.ADD}: Add the new border anyway. "
         f"{ExistingBorderHandling.REPLACE}: Replace the existing border.",
