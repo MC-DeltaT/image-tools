@@ -9,8 +9,7 @@ from colour import Color
 from PIL import Image
 
 from image_tools.common.cli.batch import (
-    filter_input_file_paths,
-    get_input_file_paths,
+    get_image_input_file_paths,
     get_output_image_path,
     validate_output_paths,
 )
@@ -112,11 +111,9 @@ def log_final_image_info(image: Image.Image) -> None:
 
 def process_image(input_path: Path, output_path: Path, config: AppConfig) -> None:
     logger.info(f"Processing '{input_path}'")
-    try:
-        image = Image.open(input_path)
-    except Image.UnidentifiedImageError as e:
-        logger.warning(str(e))
-        return
+
+    # Note if the file is not a valid image, we fail everything. User probably needs to take action.
+    image = Image.open(input_path)
 
     # We're trying to preserve as much as possible from the original image, so save the info now in case it's changed.
     write_params = get_pil_image_write_params(image)
@@ -160,8 +157,7 @@ def main():
 
         log_config(config)
 
-        input_file_paths = get_input_file_paths(config.input_path)
-        input_file_paths = filter_input_file_paths(input_file_paths)
+        input_file_paths = get_image_input_file_paths(config.input_path)
         if not input_file_paths:
             logger.info("No files to process")
             return

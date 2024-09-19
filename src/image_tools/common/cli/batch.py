@@ -9,8 +9,8 @@ from image_tools.common.cli.exception import AppError
 logger = logging.getLogger(__name__)
 
 
-def get_input_file_paths(name_or_glob: str) -> list[Path]:
-    """Generic input path handling.
+def get_image_input_file_paths(name_or_glob: str) -> list[Path]:
+    """Generic image input path handling.
     Input may be: file name, directory name, file glob."""
 
     if os.path.isfile(name_or_glob):
@@ -19,8 +19,8 @@ def get_input_file_paths(name_or_glob: str) -> list[Path]:
         return [Path(name_or_glob)]
     elif os.path.isdir(name_or_glob):
         # If path is a directory, process all files in that directory.
-        logger.info("Input path is a directory, will process all contained image files")
-        return [p for p in Path(name_or_glob).iterdir() if p.is_file()]
+        logger.info("Input path is a directory, will process all contained supported image files")
+        return [p for p in Path(name_or_glob).iterdir() if p.is_file() and is_image_file_supported(p)]
     else:
         # Otherwise, find files via glob.
         logger.info("Input path is a glob, will process all matching files")
@@ -33,16 +33,6 @@ SUPPORTED_IMAGE_EXTENSIONS = frozenset((".jpg", ".jpeg", ".png"))
 
 def is_image_file_supported(p: Path) -> bool:
     return p.suffix.lower() in SUPPORTED_IMAGE_EXTENSIONS
-
-
-def filter_input_file_paths(paths: Iterable[Path]) -> list[Path]:
-    def filter_func(path: Path) -> bool:
-        if not is_image_file_supported(path):
-            logger.info(f"Ignored non-image file: '{path}'")
-            return False
-        return True
-
-    return list(filter(filter_func, paths))
 
 
 def get_output_image_path(input_path: Path, output_directory: Path | None, output_suffix: str) -> Path:
