@@ -47,7 +47,7 @@ def detect_border(
     pixel_count_threshold: float = BORDER_DIFF_PROPORTION_THRESHOLD,
 ) -> BorderSize:
     """Infers the size of an image's border from pixel values.
-    The border must be uniform colour on all sides."""
+    The border must be uniform colour on all sides. However, the border can be differing sizes on each side."""
 
     data = np.array(image)
     # Shape is (height, width, channels)

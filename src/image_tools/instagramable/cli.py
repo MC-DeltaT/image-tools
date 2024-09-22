@@ -16,7 +16,7 @@ from image_tools.common.cli.batch import (
 from image_tools.common.cli.exception import AppError
 from image_tools.common.cli.logging import log_config, suppress_external_logging
 from image_tools.common.image.aspect_ratio import aspect_ratio
-from image_tools.common.image.border import remove_border
+from image_tools.common.image.border import detect_border, remove_border
 from image_tools.common.image.imageio import get_pil_image_write_params
 from image_tools.common.image.types import size_to_str
 from image_tools.instagramable.border import apply_new_border
@@ -125,7 +125,12 @@ def process_image(input_path: Path, output_path: Path, config: AppConfig) -> Non
         case ExistingBorderHandling.ADD:
             image = apply_border_func(image)
         case ExistingBorderHandling.REPLACE:
-            image = remove_border(image)
+            border = detect_border(image)
+            # Only remove the existing border if it's a real border on all sides.
+            # Sometimes images (particularly greyscale) have content which is uniform across one side, which shouldn't
+            # be considered a border for the purposes of this program.
+            if border.all_sides:
+                image = remove_border(image, border)
             image = apply_border_func(image)
         case v:  # type: ignore
             raise AssertionError(f"Unhandled ExistingBorderHandling {v}")
