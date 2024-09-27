@@ -82,6 +82,8 @@ def create_annotation_text(metadata: ImageMetadata, options: AnnotationOptions) 
 def calculate_text_position_and_anchor(image_size: IntSize, position: TextPosition) -> tuple[IntPos, str]:
     """Calculates the position and anchor to pass to PIL.ImageDraw.text()"""
 
+    # TODO: text alignment too?
+
     # Space between image edge and text. Kinda arbitrarily chosen.
     padding = int(min(image_size) * 0.05)
 
