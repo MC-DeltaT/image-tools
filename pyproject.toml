@@ -20,6 +20,7 @@ Homepage = "https://github.com/MC-DeltaT/image-tools"
 
 [project.scripts]
 instagramable = "image_tools.instagramable.cli:main"
+annotate-image-info = "image_tools.annotate_info.cli:main"
 
 [build-system]
 requires = [ "setuptools>=61" ]

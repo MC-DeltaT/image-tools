@@ -7,6 +7,7 @@ Experimental, no guarantees of functionality or code stability.
 ## Tools
 
 - `instagramable`: Adjusts images for effective publishing on Instagram.
+- `annotate-image-info`: Writes image metadata onto images as text.
 
 ## Requirements
 
