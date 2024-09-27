@@ -65,8 +65,17 @@ def get_config(args: list[str]) -> AppConfig:
     parser.add_argument("--camera", action="store_true", default=False, help="Annotate camera body information.")
     parser.add_argument("--lens", action="store_true", default=False, help="Annotate lens information.")
     parser.add_argument("--exposure", action="store_true", default=False, help="Annotate exposure information.")
+    parser.add_argument("--all-info", action="store_true", default=False, help="Annotate all supported information.")
 
     parsed = parser.parse_args(args)
+
+    annotation_options = AnnotationOptions(
+        camera=parsed.camera or parsed.all_info,
+        lens=parsed.lens or parsed.all_info,
+        exposure=parsed.exposure or parsed.all_info,
+    )
+    if not annotation_options.any:
+        parser.error("At least one annotation option is required")
 
     return AppConfig(
         input_path=parsed.files,
@@ -77,7 +86,7 @@ def get_config(args: list[str]) -> AppConfig:
         verbose=parsed.verbose,
         text_position=parsed.text_position,
         text_colour=parsed.text_colour,
-        annotate=AnnotationOptions(camera=parsed.camera, lens=parsed.lens, exposure=parsed.exposure),
+        annotate=annotation_options,
     )
 
 

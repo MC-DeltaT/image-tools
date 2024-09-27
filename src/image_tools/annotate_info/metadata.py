@@ -1,7 +1,10 @@
+import logging
 from dataclasses import dataclass
 
 from PIL import ExifTags
 from PIL.Image import Image
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -18,7 +21,7 @@ def get_image_metadata(img: Image) -> ImageMetadata:
     exif = img.getexif()
     ifd_exif = exif.get_ifd(ExifTags.IFD.Exif)
 
-    return ImageMetadata(
+    metadata = ImageMetadata(
         camera_model=exif.get(ExifTags.Base.Model),
         lens_model=ifd_exif.get(ExifTags.Base.LensModel),
         focal_length=ifd_exif.get(ExifTags.Base.FocalLength),
@@ -26,3 +29,5 @@ def get_image_metadata(img: Image) -> ImageMetadata:
         exposure_time=ifd_exif.get(ExifTags.Base.ExposureTime),
         iso=ifd_exif.get(ExifTags.Base.ISOSpeedRatings),
     )
+    logger.debug(f"Read image metadata: {metadata}")
+    return metadata
