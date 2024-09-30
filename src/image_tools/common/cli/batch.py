@@ -28,7 +28,7 @@ def get_image_input_file_paths(name_or_glob: str) -> list[Path]:
 
 
 # TODO? make this configurable
-SUPPORTED_IMAGE_EXTENSIONS = frozenset((".jpg", ".jpeg", ".png"))
+SUPPORTED_IMAGE_EXTENSIONS = frozenset((".jpg", ".jpeg", ".png", ".tif", ".tiff"))
 
 
 def is_image_file_supported(p: Path) -> bool:
